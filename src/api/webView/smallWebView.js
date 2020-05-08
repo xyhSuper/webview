@@ -12,3 +12,8 @@ export const getUserTaxTemplate = (param) => {
 
     return makeRequest(Signing.getUserTaxTemplate, param);
 };
+
+export const getUserTaxSignInfo = (param) => {
+
+    return makeRequest(Signing.getUserTaxSignInfo, param);
+};

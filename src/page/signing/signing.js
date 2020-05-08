@@ -1,74 +1,57 @@
 import "./signing.scss";
 import React, { useEffect, useState } from "react";
-import { Button, message, Skeleton } from "antd";
+import { message, Skeleton, Spin } from "antd";
 import Api from "./../../api/api";
-import { Document, Page, pdfjs } from "react-pdf";
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const Signig = () => {
-  const [numPages, setNumPages] = useState(null);
-  const [pdf, setPdf] = useState("");
-  const [id, setId] = useState("");
+  const [url, setUlr] = useState(
+    "https://oss.zfycloud.com/template/user_sign_template_image.png"
+  );
+  const [spinning, setSpinning] = useState(false);
   useEffect(() => {
-    getUserTaxTemplate();
     window.sessionStorage.setItem("token", getUrlParam("token"));
+    // getUserTaxTemplate();
+    // window.TOKEN = getUrlParam("token");
   }, []);
   return (
-    <div className="signig">
-      {/*<span className='signig-code'>2000189281</span>*/}
-      <Document
-        className="pdfStyle"
-        file={pdf}
-        // file={require('../../img/target_7.pdf')}
-        onLoadSuccess={onDocumentLoadSuccess}
-        loading={loading()}
-      >
-        {/*<span*/}
-        {/*    className='pdfStyle-date'*/}
-        {/*>2020-3-14</span>*/}
-        {Array.from(new Array(numPages), (el, index) => (
-          <Page key={`page_${index + 1}`} pageNumber={index + 1} />
-        ))}
-      </Document>
-      {/*<iframe*/}
-      {/*  height="800"*/}
-      {/*  src="https://yunnanapp.oss-cn-beijing.aliyuncs.com/target.pdf"*/}
-      {/*></iframe>*/}
+    <Spin tip="数据加载中" size="large" spinning={spinning}>
+      <div className="signig">
+        {url ? <img className="signig-img" src={url} alt="img" /> : <Loading />}
 
-      <div className="signig-foot">
-        <Button onClick={callbackApp} size="large" type="primary">
-          签约
-        </Button>
+        {/*<div className="signig-foot">*/}
+        {/*  <Button onClick={callbackApp} size="large" type="primary">*/}
+        {/*    签约*/}
+        {/*  </Button>*/}
+        {/*</div>*/}
       </div>
-    </div>
+    </Spin>
   );
-  function onDocumentLoadSuccess(document) {
-    const { numPages } = document;
-    setNumPages(numPages);
-  }
   async function callbackApp() {
-    let result = await Api.webView.submitSigning(id);
+    setSpinning(true);
+    let result = await Api.webView.submitSigning();
     if (result && result.success) {
-      setTimeout(() => {
-        window.wx.miniProgram.postMessage({ data: true });
-        window.wx.miniProgram.redirectTo({
-          url: "/pages/personal/personal"
-        });
-      }, 1000);
+      window.wx.miniProgram.postMessage({ data: true });
+      window.wx.miniProgram.redirectTo({
+        url: "/pages/personal/personal"
+      });
+      setSpinning(false);
     } else {
+      setSpinning(false);
       message.error(result.message);
     }
   }
 
   async function getUserTaxTemplate() {
+    setSpinning(true);
     try {
-      let result = await Api.webView.getUserTaxTemplate();
-      console.log(result);
+      let result = await Api.webView.getUserTaxTemplate("user_sign_image_url");
+
       if (result && result.success && result.result) {
-        setPdf(result.result.signContent);
-        setId(result.result.id);
+        setUlr(result.result);
+        setSpinning(false);
       }
     } catch (e) {
+      setSpinning(false);
       console.log(e);
     }
   }
@@ -76,17 +59,13 @@ const Signig = () => {
 
 export default Signig;
 
-function getUrlParam(name) {
-  //分割参数
-  let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
-  let r = window.location.search.substr(1).match(reg); //匹配目标参数
-  if (r != null) {
-    return r[2];
-  }
-  return null; //返回参数值
+function getUrlParam(parameter) {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  return urlParams.get(parameter);
 }
 
-const loading = () => {
+const Loading = () => {
   return (
     <div>
       <Skeleton className="all" active />

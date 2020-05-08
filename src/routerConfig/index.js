@@ -11,8 +11,11 @@ const App = () => {
             <Router history={historys}>
 
                 <Switch>
-                    <Suspense fallback={<div>Loading...</div>}>
+                    <Suspense fallback={<div> </div>}>
                     <Route exact path="/signing" component={config.signing} />
+                    <Route exact path="/userAgreement" component={config.userAgreement} />
+                    <Route exact path="/privacy" component={config.privacy} />
+                    <Route exact path="/hassigned" component={config.Hassigned} />
                     </Suspense>
                 </Switch>
             </Router>

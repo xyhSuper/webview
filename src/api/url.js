@@ -26,8 +26,14 @@ export const Signing = {
         spell: true
     },
     getUserTaxTemplate: {
-        url: "/tax/client/user/sign/getUserTaxTemplate", //查询用户税务平台小程序签约协议
+        url: "/tax/contract/getContractContent", //查询用户税务平台小程序签约协议
         method: "get",
+        spell: true
+     },
+    getUserTaxSignInfo: {
+        url: "/tax/client/user/sign/getUserTaxSignInfo", //pdf预览
+        method: "get",
+        spell: true
      },
 
 
